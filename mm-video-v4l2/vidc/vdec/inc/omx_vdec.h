@@ -72,6 +72,7 @@ extern "C" {
 }
 #include <linux/videodev2.h>
 #include <poll.h>
+#include "hevc_utils.h"
 #define TIMEOUT 5000
 #endif // _ANDROID_
 
@@ -616,6 +617,7 @@ class omx_vdec: public qc_omx_component
         OMX_ERRORTYPE push_input_buffer (OMX_HANDLETYPE hComp);
         OMX_ERRORTYPE push_input_sc_codec (OMX_HANDLETYPE hComp);
         OMX_ERRORTYPE push_input_h264 (OMX_HANDLETYPE hComp);
+        OMX_ERRORTYPE push_input_hevc (OMX_HANDLETYPE hComp);
         OMX_ERRORTYPE push_input_vc1 (OMX_HANDLETYPE hComp);
 
         OMX_ERRORTYPE fill_this_buffer_proxy(OMX_HANDLETYPE       hComp,
@@ -825,6 +827,10 @@ class omx_vdec: public qc_omx_component
 
         /*Variables for arbitrary Byte parsing support*/
         frame_parse m_frame_parser;
+        h264_stream_parser *h264_parser;
+        MP4_Utils mp4_headerparser;
+        HEVC_Utils m_hevc_utils;
+
         omx_cmd_queue m_input_pending_q;
         omx_cmd_queue m_input_free_q;
         bool arbitrary_bytes;
@@ -860,7 +866,6 @@ class omx_vdec: public qc_omx_component
         struct vdec_allocatorproperty op_buf_rcnfg;
         bool in_reconfig;
         OMX_NATIVE_WINDOWTYPE m_display_id;
-        h264_stream_parser *h264_parser;
         OMX_U32 client_extradata;
 #ifdef _ANDROID_
         bool m_debug_timestamp;
@@ -876,9 +881,7 @@ class omx_vdec: public qc_omx_component
         bool m_disable_dynamic_buf_mode;
         OMX_U32 m_conceal_color;
 #endif
-#ifdef MAX_RES_1080P
-        MP4_Utils mp4_headerparser;
-#endif
+
 
         struct h264_mv_buffer {
             unsigned char* buffer;
@@ -1029,4 +1032,27 @@ enum vidc_resposes_id {
 
 #endif // _MSM8974_
 
+#include <linux/version.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
+#define V4L2_MPEG_VIDC_INDEX_EXTRADATA_ASPECT_RATIO V4L2_MPEG_VIDC_EXTRADATA_ASPECT_RATIO
+#define EXTRADATA_NONE MSM_VIDC_EXTRADATA_NONE
+#define EXTRADATA_INTERLACE_VIDEO MSM_VIDC_EXTRADATA_INTERLACE_VIDEO
+#define INTERLACE_FRAME_PROGRESSIVE MSM_VIDC_INTERLACE_FRAME_PROGRESSIVE
+#define INTERLACE_INTERLEAVE_FRAME_TOPFIELDFIRST MSM_VIDC_INTERLACE_INTERLEAVE_FRAME_TOPFIELDFIRST
+#define INTERLACE_INTERLEAVE_FRAME_BOTTOMFIELDFIRST MSM_VIDC_INTERLACE_INTERLEAVE_FRAME_BOTTOMFIELDFIRST
+#define EXTRADATA_FRAME_RATE MSM_VIDC_EXTRADATA_FRAME_RATE
+#define EXTRADATA_TIMESTAMP MSM_VIDC_EXTRADATA_TIMESTAMP
+#define EXTRADATA_NUM_CONCEALED_MB MSM_VIDC_EXTRADATA_NUM_CONCEALED_MB
+#define EXTRADATA_INDEX MSM_VIDC_EXTRADATA_INDEX
+#define EXTRADATA_ASPECT_RATIO MSM_VIDC_EXTRADATA_ASPECT_RATIO
+#define EXTRADATA_RECOVERY_POINT_SEI MSM_VIDC_EXTRADATA_RECOVERY_POINT_SEI
+#define FRAME_RECONSTRUCTION_CORRECT MSM_VIDC_FRAME_RECONSTRUCTION_CORRECT
+#define EXTRADATA_PANSCAN_WINDOW MSM_VIDC_EXTRADATA_PANSCAN_WINDOW
+#define EXTRADATA_MPEG2_SEQDISP MSM_VIDC_EXTRADATA_MPEG2_SEQDISP
+#define EXTRADATA_S3D_FRAME_PACKING MSM_VIDC_EXTRADATA_S3D_FRAME_PACKING
+#define EXTRADATA_FRAME_QP MSM_VIDC_EXTRADATA_FRAME_QP
+#define EXTRADATA_FRAME_BITS_INFO MSM_VIDC_EXTRADATA_FRAME_BITS_INFO
+#define INTERLACE_INTERLEAVE_FRAME_TOPFIELDFIRST MSM_VIDC_INTERLACE_INTERLEAVE_FRAME_TOPFIELDFIRST
+#define INTERLACE_INTERLEAVE_FRAME_BOTTOMFIELDFIRST MSM_VIDC_INTERLACE_INTERLEAVE_FRAME_BOTTOMFIELDFIRST
+#endif
 #endif // __OMX_VDEC_H__

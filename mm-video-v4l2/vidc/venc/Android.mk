@@ -1,6 +1,8 @@
 ifneq ($(BUILD_TINY_ANDROID),true)
 
 ROOT_DIR := $(call my-dir)
+OMX_VIDEO_PATH := $(ROOT_DIR)/../..
+
 
 include $(CLEAR_VARS)
 LOCAL_PATH:= $(ROOT_DIR)
@@ -64,6 +66,18 @@ libmm-venc-def += -DMAX_RES_1080P_EBI
 libOmxVdec-def += -DPROCESS_EXTRADATA_IN_OUTPUT_PORT
 libmm-venc-def += -D_MSM8974_
 endif
+ifeq ($(TARGET_BOARD_PLATFORM),msm_bronze)
+libmm-venc-def += -DMAX_RES_1080P
+libmm-venc-def += -DMAX_RES_1080P_EBI
+libOmxVdec-def += -DPROCESS_EXTRADATA_IN_OUTPUT_PORT
+libmm-venc-def += -D_MSM8974_
+endif
+ifeq ($(TARGET_BOARD_PLATFORM),msm8916)
+libmm-venc-def += -DMAX_RES_1080P
+libmm-venc-def += -DMAX_RES_1080P_EBI
+libOmxVdec-def += -DPROCESS_EXTRADATA_IN_OUTPUT_PORT
+libmm-venc-def += -D_MSM8974_
+endif
 
 ifeq ($(TARGET_USES_ION),true)
 libmm-venc-def += -DUSE_ION
@@ -100,11 +114,11 @@ LOCAL_C_INCLUDES                := $(libmm-venc-inc)
 
 LOCAL_PRELINK_MODULE      := false
 LOCAL_SHARED_LIBRARIES    := liblog libutils libbinder libcutils \
-                             libc2dcolorconvert libdl
+                             libc2dcolorconvert libdl libgui
 
 LOCAL_SRC_FILES   := src/omx_video_base.cpp
 LOCAL_SRC_FILES   += src/omx_video_encoder.cpp
-ifeq ($(call is-board-platform-in-list,msm8974 msm8610 msm8226 apq8084 mpq8092),true)
+ifeq ($(call is-board-platform-in-list,msm8974 msm8610 msm8226 apq8084 mpq8092 msm_bronze msm8916),true)
 LOCAL_SRC_FILES   += src/video_encoder_device_v4l2.cpp
 else
 LOCAL_SRC_FILES   += src/video_encoder_device.cpp
